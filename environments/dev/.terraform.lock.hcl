@@ -2,7 +2,8 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/solaceproducts/solacebroker" {
-  version = "1.2.0"
+  version     = "1.2.0"
+  constraints = ">= 1.0.0"
   hashes = [
     "h1:mc2cC9BvU7FSsgLhRvsBR21mANRs9FFqknZHQA5FdcI=",
     "zh:12b2fa3b4c74ed3c935779641b1545fc433d0d9144d6b57fa2ef47d23b9c736b",

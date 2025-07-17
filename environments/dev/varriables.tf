@@ -28,12 +28,12 @@ variable "vpn_configs" {
       publish_topic_default_action   = string
       subscribe_topic_default_action = string
     }))
-    publish_exceptions = list(object({
+    acl_publish_exceptions = list(object({
       acl_profile_name               = string
       publish_topic_exception        = string
       publish_topic_exception_syntax = string
     }))
-    subscribe_exceptions = list(object({
+    acl_subscribe_exceptions = list(object({
       acl_profile_name                 = string
       subscribe_topic_exception        = string
       subscribe_topic_exception_syntax = string

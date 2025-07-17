@@ -1,10 +1,12 @@
 terraform {
   required_providers {
     solacebroker = {
-      source = "registry.terraform.io/solaceproducts/solacebroker"
+      source  = "solaceproducts/solacebroker"
+      version = ">= 1.0.0"
     }
   }
 }
+
 
 provider "solacebroker" {
   username = var.cred.username
@@ -42,85 +44,129 @@ module "client_profile" {
   depends_on = [module.vpn]
 }
 
-/*
+
 # ACL Profile per VPN
-module "acl_profile" {
-  for_each = var.acl_profiles
+module "acl_profiles" {
+  source = "../../modules/solace-service/acl_profile"
 
-  source   = "../../modules/solace-service/acl_profile"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs : vpn_key => vpn_cfg
+    if length(try(vpn_cfg.acl_profiles, [])) > 0
+  }
+
+  msg_vpn_name = module.vpn[each.key].msg_vpn_name
+  acl_profiles = each.value.acl_profiles
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name = module.vpn[each.value.vpn_key].msg_vpn_name
-  acl_profiles = each.value.profiles
+  depends_on = [module.vpn]
 }
 
-# ACL Publish Exceptions
-module "publish_exceptions" {
-  for_each = var.publish_exceptions
+# publish exceptions
+module "acl_publish_exceptions" {
+  source = "../../modules/solace-service/acl_publish_exceptions"
 
-  source   = "../../modules/solace-service/acl_publish_exceptions"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs :
+    vpn_key => vpn_cfg
+    if length(try(vpn_cfg.acl_publish_exceptions, [])) > 0
+  }
+
+  msg_vpn_name        = module.vpn[each.key].msg_vpn_name
+  publish_exceptions  = each.value.acl_publish_exceptions
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name       = module.vpn[each.value.vpn_key].msg_vpn_name
-  publish_exceptions = each.value.exceptions
+  depends_on = [module.acl_profiles]
 }
 
-# ACL Subscribe Exceptions
-module "subscribe_exceptions" {
-  for_each = var.subscribe_exceptions
+# subscribe exceptions
+module "acl_subscribe_exceptions" {
+  source = "../../modules/solace-service/acl_subscribe_exceptions"
 
-  source   = "../../modules/solace-service/acl_subscribe_exceptions"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs :
+    vpn_key => vpn_cfg
+    if length(try(vpn_cfg.acl_subscribe_exceptions, [])) > 0
+  }
+
+  msg_vpn_name        = module.vpn[each.key].msg_vpn_name
+  subscribe_exceptions  = each.value.acl_subscribe_exceptions
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name         = module.vpn[each.value.vpn_key].msg_vpn_name
-  subscribe_exceptions = each.value.exceptions
+  depends_on = [module.acl_profiles]
 }
 
 # Client usernames
-module "client_usernames" {
-  for_each = var.usernames
+module "usernames" {
+  source = "../../modules/solace-service/username"
 
-  source   = "../../modules/solace-service/client_username"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs :
+    vpn_key => vpn_cfg
+    if length(try(vpn_cfg.usernames, [])) > 0
+  }
+
+  msg_vpn_name = module.vpn[each.key].msg_vpn_name
+  usernames    = each.value.usernames
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name = module.vpn[each.value.vpn_key].msg_vpn_name
-  usernames    = each.value.entries
+  depends_on = [module.vpn,module.client_profile,module.acl_profiles]
 }
 
-# Queues
+# Queues per VPN
 module "queues" {
-  for_each = var.queues
+  source = "../../modules/solace-service/queue"
 
-  source   = "../../modules/solace-service/queue"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs :
+    vpn_key => vpn_cfg
+    if length(try(vpn_cfg.queues, [])) > 0
+  }
+
+  msg_vpn_name = module.vpn[each.key].msg_vpn_name
+  queues       = each.value.queues
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name = module.vpn[each.value.vpn_key].msg_vpn_name
-  queues       = each.value.entries
+  depends_on = [module.vpn, module.usernames]
 }
 
-# Subscriptions
+
+# Subscription for queues
 module "subscriptions" {
-  for_each = var.subscriptions
+  source = "../../modules/solace-service/subscription"
 
-  source   = "../../modules/solace-service/queue_subscription"
+  for_each = {
+    for vpn_key, vpn_cfg in var.vpn_configs :
+    vpn_key => vpn_cfg
+    if length(try(vpn_cfg.subscriptions, [])) > 0
+  }
+
+  msg_vpn_name  = module.vpn[each.key].msg_vpn_name
+  subscriptions = each.value.subscriptions
+
   providers = {
     solacebroker = solacebroker
   }
 
-  msg_vpn_name   = module.vpn[each.value.vpn_key].msg_vpn_name
-  subscriptions  = each.value.entries
+  depends_on = [module.queues]
 }
 
+
+/*
 # Outputs
 output "vpn_names" {
   value = { for k, v in module.vpn : k => v.msg_vpn_name }
