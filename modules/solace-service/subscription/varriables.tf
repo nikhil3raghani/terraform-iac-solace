@@ -1,3 +1,4 @@
+/*
 variable "msg_vpn_name" {
   type = string
 }
@@ -8,3 +9,18 @@ variable "subscriptions" {
     subscription_topic = string
   }))
 }
+*/
+
+variable "msg_vpn_name" {
+  type = string
+}
+
+variable "subscriptions" {
+  type = list(object({
+    queue_name = string
+    topics     = list(string)
+  }))
+}
+
+
+

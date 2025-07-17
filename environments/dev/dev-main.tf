@@ -84,6 +84,7 @@ module "acl_publish_exceptions" {
   depends_on = [module.acl_profiles]
 }
 
+
 # subscribe exceptions
 module "acl_subscribe_exceptions" {
   source = "../../modules/solace-service/acl_subscribe_exceptions"
@@ -103,6 +104,10 @@ module "acl_subscribe_exceptions" {
 
   depends_on = [module.acl_profiles]
 }
+
+
+#new sub try
+
 
 # Client usernames
 module "usernames" {

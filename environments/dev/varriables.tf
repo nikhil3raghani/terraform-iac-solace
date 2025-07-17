@@ -5,6 +5,7 @@ variable "cred" {
     password = string
     url      = string
   })
+  sensitive = true
 }
 
 variable "vpn_configs" {
@@ -56,8 +57,8 @@ variable "vpn_configs" {
       permission           = string
     }))
     subscriptions = list(object({
-      queue_name         = string
-      subscription_topic = string
-    }))
+    queue_name = string
+    topics     = list(string)
+  }))
   }))
 }
