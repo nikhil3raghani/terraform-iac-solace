@@ -1,80 +1,89 @@
 variable "cred" {
-  default = {
-    username = "admin"
-    password = "admin"
-    url      = "http://localhost:8080"
-  }
+  description = "Solace broker credentials and URL"
+  type = object({
+    username = string
+    password = string
+    url      = string
+  })
 }
 
-variable "msg-vpn" {
-  default = {
-    msg_vpn_name              = "TEST"
-    enabled                   = true
-    max_msg_spool_usage       = 1000
-    authentication_basic_type = "none"
-  }
+variable "msg_vpn" {
+  description = "Message VPN configuration"
+  type = object({
+    msg_vpn_name              = string
+    enabled                   = bool
+    max_msg_spool_usage       = number
+    authentication_basic_type = string
+  })
 }
 
-variable "client-profile" {
-  default = [{
-    "client_profile_name"                   = "default",
-    "allow_bridge_connections_enabled"      = true,
-    "allow_guaranteed_msg_send_enabled"     = true,
-    "allow_guaranteed_msg_receive_enabled"  = true
-  }]
+variable "client_profile" {
+  description = "Client profile configurations"
+  type = list(object({
+    client_profile_name                  = string
+    allow_bridge_connections_enabled     = bool
+    allow_guaranteed_msg_send_enabled    = bool
+    allow_guaranteed_msg_receive_enabled = bool
+  }))
 }
 
-variable "acl-profile" {
-  default = [{
-    "acl_profile_name"                : "default",
-    "client_connect_default_action"   : "allow",
-    "publish_topic_default_action"    : "disallow",
-    "subscribe_topic_default_action"  : "disallow"
-  }]
+variable "acl_profile" {
+  description = "ACL profile configurations"
+  type = list(object({
+    acl_profile_name               = string
+    client_connect_default_action  = string
+    publish_topic_default_action   = string
+    subscribe_topic_default_action = string
+  }))
 }
 
-variable "publish-exp" {
-  default = [{
-    "acl_profile_name"               : "default",
-    "publish_topic_exception"        : "test/>",
-    "publish_topic_exception_syntax" : "smf"
-  }]
+variable "publish_exp" {
+  description = "Publish topic exceptions"
+  type = list(object({
+    acl_profile_name               = string
+    publish_topic_exception        = string
+    publish_topic_exception_syntax = string
+  }))
 }
 
-variable "subscribe-exp" {
-  default = [{
-    "acl_profile_name"                 : "default",
-    "subscribe_topic_exception"        : "test/>",
-    "subscribe_topic_exception_syntax" : "smf"
-  }]
+variable "subscribe_exp" {
+  description = "Subscribe topic exceptions"
+  type = list(object({
+    acl_profile_name                 = string
+    subscribe_topic_exception        = string
+    subscribe_topic_exception_syntax = string
+  }))
 }
 
 variable "username" {
-  default = [{
-    "client_username"      : "default",
-    "password"             : "default",
-    "client_profile_name"  : "default",
-    "acl_profile_name"     : "default",
-    "enabled"              : "true"
-  }]
+  description = "Client usernames"
+  type = list(object({
+    client_username     = string
+    password            = string
+    client_profile_name = string
+    acl_profile_name    = string
+    enabled             = bool
+  }))
 }
 
 variable "queue" {
-  default = [{
-    "queue_name" : "q1",
-    "ingress_enabled" : true,
-    "egress_enabled" : true,
-    "access_type" : "exclusive",
-    "max_msg_spool_usage" : 10,
-    "max_bind_count" : 2,
-    "owner" : "default",
-    "permission" : "consume"
-  }]
+  description = "Queue configurations"
+  type = list(object({
+    queue_name           = string
+    ingress_enabled      = bool
+    egress_enabled       = bool
+    access_type          = string
+    max_msg_spool_usage  = number
+    max_bind_count       = number
+    owner                = string
+    permission           = string
+  }))
 }
 
 variable "subscription" {
-  default = [{
-    "queue_name"         : "q1",
-    "subscription_topic" : "test/1"
-  }]
+  description = "Queue subscriptions"
+  type = list(object({
+    queue_name         = string
+    subscription_topic = string
+  }))
 }
